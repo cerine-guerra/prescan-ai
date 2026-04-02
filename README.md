@@ -1,4 +1,6 @@
-# 🛡️ Prescan AI Backend
+#🔍 Prescan AI — Threat Detection Platform
+
+AI-powered malware and phishing detection. Upload a file or paste a URL to instantly scan for threats, risks, and dangers.
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Python 3.10+](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)](https://www.python.org/)
@@ -14,113 +16,185 @@
 - **Machine Learning & Heuristics**: Automatically loads specialized `.pt` PyTorch models for AI-driven detection. Defaults to a high-speed keyword heuristic engine if models aren't available.
 - **CORS-Ready & Robust**: Built atop FastAPI and Uvicorn, ready to handle cross-origin requests from any frontend tier.
 
-## 📁 Project Structure
 
-```text
+📋 Table of Contents
+
+Project Overview
+Tech Stack
+Project Structure
+Getting Started (New Collaborator)
+Running the Project
+API Endpoints
+AI Models
+Environment Variables
+Important Notes
+
+
+Project Overview
+Prescan AI is a cybersecurity web application that uses machine learning to detect malware in files and phishing threats in URLs. It consists of:
+
+A Vue.js frontend with a dark cybersecurity-themed UI
+A FastAPI Python backend with REST API endpoints
+A Docker sandbox that isolates and analyzes files safely
+Two Random Forest AI models — one for file malware detection, one for URL threat detection
+A rules-based fallback engine that activates if models are unavailable
+
+
+Tech Stack
+LayerTechnologyFrontendVue.js 3, Tailwind CSS, jsPDFBackendPython, FastAPI, UvicornAI Modelsscikit-learn 1.6.1, Random ForestSandboxDocker (isolated container)File ParsingPyPDF2, python-docx, pandasURL Scanninghttpx (async HTTP client)Emailaiosmtplib (Gmail SMTP)HostingGitHub Codespaces
+
+Project Structure
 prescan-backend/
-├── main.py             # FastAPI entry point & API endpoints
-├── model_server.py     # ML Model loader and prediction logic
-├── parser.py           # Document text extraction utilities
-├── rules_fallback.py   # Heuristic keyword-based analysis engine
-├── sandbox.py          # Docker container orchestration logic
-├── sandbox-image/      # Docker context for the analysis sandbox
-│   ├── Dockerfile      # Sandbox image definition
-│   └── analyze.py      # Script that runs inside the container
-├── model/              # Directory for trained PyTorch models (.pt)
-├── requirements.txt    # Python dependencies
-└── .env.example        # Environment variable template
-```
+├── frontend/
+│   └── index.html              ← Vue.js single-page frontend
+├── main.py                     ← FastAPI app — all API routes
+├── model_server.py             ← AI model loader and predict functions
+├── parser.py                   ← File text extractor (PDF, DOCX, CSV, TXT)
+├── rules_fallback.py           ← Keyword-based fallback detection engine
+├── sandbox.py                  ← Docker sandbox wrapper
+├── sandbox-image/
+│   ├── Dockerfile              ← Sandbox container definition
+│   └── analyze.py              ← Behavior monitor (runs inside container)
+├── model/
+│   ├── prescan_model.joblib    ← Malware detection model (not on GitHub)
+│   └── url_model.pkl           ← URL threat detection model (not on GitHub)
+├── .env                        ← Secret credentials (not on GitHub)
+├── .gitignore
+└── README.md
 
-## 🚀 How to Run the Project (For Team Members)
+Getting Started (New Collaborator)
+Follow these steps in order after accepting the GitHub collaboration invite.
+Step 1 — Open the project in Codespaces
 
-### 1️⃣ Create a Codespace
+Go to the shared GitHub repository
+Click the green Code button
+Click the Codespaces tab
+Click Create codespace on main
 
-1. Go to the GitHub repository
-2. Click the **Code** button (green)
-3. Select **Codespaces** tab
-4. Click **Create codespace on main**
+Wait for the Codespace to load fully before continuing.
+Step 2 — Install all dependencies
+Open the terminal inside Codespaces and run:
+bashcd /workspaces/prescan-backend
 
-> ⏱️ This takes 2-3 minutes to build the environment
+pip install fastapi uvicorn python-multipart python-dotenv \
+    httpx torch PyPDF2 python-docx scikit-learn==1.6.1 \
+    joblib aiosmtplib aiofiles docker
 
----
+⚠️ Important: You must use scikit-learn==1.6.1 exactly. Other versions will cause a version mismatch error when loading the models.
 
-### 2️⃣ Check Your Path
+Step 3 — Create the .env file
+you can also get ut directly from the google drive folder
 
-Once the Codespace opens, make sure you're in the correct directory:
+Step 4 — Upload the AI model files
+The model files are too large for GitHub. Get them from the project lead via Google Drive, then upload them:
 
+In VS Code file explorer, right-click the model/ folder
+Click Upload
+Upload prescan_model.joblib
 
-# Check where you are
-pwd
+Verify they uploaded correctly:
+bashls -lh /workspaces/prescan-backend/model/
+Both files should be several MB in size. If they show KB, the upload was incomplete — try again.
+Step 5 — Build the Docker sandbox image
+bashdocker build -t prescan-sandbox /workspaces/prescan-backend/sandbox-image/
+This takes about 2 minutes. You should see Successfully tagged prescan-sandbox:latest at the end.
+Step 6 — Update the frontend API URL
+Your Codespace has a different URL from the project lead's. Find your URL:
+bashecho "https://${CODESPACE_NAME}-8000.app.github.dev"
+Open frontend/index.html and update this line near the top of the JavaScript section:
+javascriptconst API_BASE = 'https://YOUR-CODESPACE-URL-8000.app.github.dev';
 
-# You should be in: /workspaces/prescan-backend
-
-# List files to verify
-ls -la
-
-
-3️⃣ Install Dependencies
-bash
-# Install all required Python packages
-pip install -r requirements.txt
-
-4️⃣ Download the AI Model ⚠️ IMPORTANT
-The AI model is too large for GitHub, so you need to download it separately.
-
-Download the model from Google Drive:
-
-download the AI model from this link : 
-https://colab.research.google.com/drive/1JP45Vq4RQf9ddk5b1JOgiIZXm2_kAPIl?usp=drive_link
-
-Place the model in the correct folder:
-
-bash
-# Create the model directory if it doesn't exist
-mkdir -p model
-
-# Move the downloaded model file into the model folder
-# The file is named : prescan_model.joblib
-Verify the model is in place:
-
-bash
-ls -la model/
-# You should see your model file(s)
-📁 Expected model location: /workspaces/prescan-backend/model/prescan_model.joblib
-
-5️⃣ Run the Server
-bash
-# Start the backend server
+Running the Project
+Start the API server
+bashcd /workspaces/prescan-backend
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-You'll see:
+Make port 8000 public
+In VS Code, click the Ports tab at the bottom → right-click port 8000 → Port Visibility → Public
+Verify the server is running
+Open this URL in your browser:
+https://YOUR-CODESPACE-URL-8000.app.github.dev/health
+You should see:
+json{"status": "ok"}
+Open the frontend
+Double-click frontend/index.html on your local PC to open it in the browser. The frontend connects to your Codespace API automatically.
+Keep the server running in the background
+If you want the server to keep running after closing the terminal:
+bashnohup uvicorn main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 &
+Check if it is running:
+bashcurl http://localhost:8000/health
+View live logs:
+bashtail -f server.log
+Stop the server:
+bashpkill -f uvicorn
 
-text
-INFO:     Started server process
-INFO:     Uvicorn running on http://0.0.0.0:8000
+API Endpoints
+MethodEndpointDescriptionGET/healthCheck if server is runningPOST/api/analyzeScan an uploaded file for malwarePOST/api/analyze-urlScan a URL for phishing threatsPOST/api/contactSend a contact form email
+File Analysis — POST /api/analyze
+Request: multipart/form-data with a file field
+Accepted formats: .pdf, .txt, .docx, .csv, .md, .log
+Max file size: 10 MB (configurable in .env)
+Response:
+json{
+  "verdict": "MALICIOUS",
+  "risk_score": 95,
+  "confidence": 95,
+  "flags": ["eval(", "exec(", "ransom"],
+  "source": "random_forest_malware",
+  "filename": "test.txt",
+  "sandbox_log": "FILE_SIZE: 38 bytes\nENTROPY: 4.05\n..."
+}
+URL Analysis — POST /api/analyze-url
+Request:
+json{ "url": "https://example.com" }
+Response:
+json{
+  "verdict": "CLEAN",
+  "risk_score": 12,
+  "confidence": 88,
+  "flags": [],
+  "source": "random_forest_url",
+  "url": "https://example.com",
+  "final_url": "https://example.com",
+  "redirected": false
+}
+Verdict meanings
+VerdictRisk ScoreMeaningCLEAN0 – 39No threats detectedSUSPICIOUS40 – 74Potentially dangerous, review recommendedMALICIOUS75 – 100High confidence threat detected
 
-6️⃣ Make the Port Public
-Important: The port needs to be public so the frontend can connect.
+AI Models
+Malware Detection Model (prescan_model.joblib)
 
-In the Codespace terminal, look for the Ports tab (next to Terminal)
+Algorithm: Random Forest (200 trees)
+Trained on: EMBER 2018 dataset (150,000+ PE file samples)
+Features: Byte histogram, entropy, string patterns, file structure
+Accuracy: ~97%
+Used for: File uploads
 
-Find port 8000 in the list
+URL Threat Detection Model (url_model.pkl)
 
-Right-click on it → Select "Port Visibility" → "Public"
+Algorithm: Random Forest
+Features: URL structure, domain patterns, page content analysis
+Used for: URL scanning
 
-You should see the visibility change from 🔒 Private to 🌐 Public
-7️⃣ Access the Application
-Once the port is public, open your browser and go to:
+Fallback Engine (rules_fallback.py)
+If either model file is not found, the system automatically falls back to a keyword-based rules engine. The source field in the response will show rules_fallback instead of random_forest_malware or random_forest_url.
 
-text
-https://scaling-adventure-pjr47779j6p3gjq-8000.app.github.dev
-Note: This is the shared API URL. When you run the server locally, your Codespace will have its own unique URL. Check the Ports tab for your specific URL.
+Environment Variables
+VariableDescriptionExampleMALWARE_MODEL_PATHPath to malware model file./model/prescan_model.joblibURL_MODEL_PATHPath to URL model file./model/url_model.pklMAX_FILE_MBMaximum upload file size in MB10MAIL_EMAILGmail address for contact formvectorshield2026@gmail.comMAIL_PASSWORDGmail App Password (16 characters)xxxx xxxx xxxx xxxx
 
-To find your unique URL:
+Important Notes
+Never commit these files to GitHub:
 
-Go to the Ports tab
+.env — contains email credentials
+model/*.joblib and model/*.pkl — model files are too large and contain proprietary training
 
-Hover over the "Address" column for port 8000
+Codespace idle timeout: Set your idle timeout to 4 hours before a demo to prevent the Codespace from sleeping. Go to github.com/settings/codespaces and update the setting.
+Port visibility: Every time you create a new Codespace, you must set port 8000 to Public in the Ports tab. It resets to Private by default.
+sklearn version: Always use scikit-learn==1.6.1. The models were trained with this version and will throw warnings or errors with newer versions.
+Docker sandbox: The sandbox runs files in a fully isolated container with no internet access and a 30-second timeout. It is safe to test with suspicious-looking files — they cannot escape the container.
 
-Click the 🌐 icon to open in browser
-
+Contact
+Email: vectorshield2026@gmail.com
+Team: Prescan AI — Built for the 2026 hackathon
 ### 1. File Analysis (`POST /api/analyze`)
 
 Upload a file using `multipart/form-data`. The file will be passed through text extraction and isolated sandbox execution, before being scored for risk.
