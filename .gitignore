@@ -1,3 +1,4 @@
 .env
 model/*.pt
 __pycache__/
+model/prescan_model.joblib
