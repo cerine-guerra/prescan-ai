@@ -62,92 +62,143 @@ prescan-backend/
 ├── .gitignore
 └── README.md
 
-Getting Started (New Collaborator)
-Follow these steps in order after accepting the GitHub collaboration invite.
-Step 1 — Open the project in Codespaces
+🚀 Getting Started (New Collaborator)
 
-Go to the shared GitHub repository
-Click the green Code button
-Click the Codespaces tab
-Click Create codespace on main
+Follow these steps carefully after accepting the GitHub collaboration invite.
 
-Wait for the Codespace to load fully before continuing.
-Step 2 — Install all dependencies
+1. Open the Project in Codespaces
+Navigate to the shared repository on GitHub
+Click the green “Code” button
+Go to the Codespaces tab
+Click “Create codespace on main”
+
+⏳ Wait until the Codespace is fully loaded before proceeding.
+
+2. Install Dependencies
+
 Open the terminal inside Codespaces and run:
-bashcd /workspaces/prescan-backend
+
+cd /workspaces/prescan-backend
 
 pip install fastapi uvicorn python-multipart python-dotenv \
     httpx torch PyPDF2 python-docx scikit-learn==1.6.1 \
     joblib aiosmtplib aiofiles docker
 
-⚠️ Important: You must use scikit-learn==1.6.1 exactly. Other versions will cause a version mismatch error when loading the models.
+⚠️ Important:
+Use scikit-learn==1.6.1 exactly. Other versions will cause model loading errors.
 
-Step 3 — Create the .env file
-you can also get ut directly from the google drive folder
+3. Create the .env File
 
-Step 4 — Upload the AI model files
-The model files are too large for GitHub. Get them from the project lead via Google Drive, then upload them:
+You can:
 
-In VS Code file explorer, right-click the model/ folder
+Request the .env file from the project lead, or
+Download it from the shared Google Drive folder
+4. Upload AI Model Files
+
+The model files are too large for GitHub. Download them from Google Drive, then:
+
+Open the file explorer in VS Code
+Right-click the model/ folder
 Click Upload
-Upload prescan_model.joblib
+Upload the following files:
+prescan_model.joblib
+url_model.pkl
+Verify Upload
+ls -lh /workspaces/prescan-backend/model/
 
-Verify they uploaded correctly:
-bashls -lh /workspaces/prescan-backend/model/
-Both files should be several MB in size. If they show KB, the upload was incomplete — try again.
-Step 5 — Build the Docker sandbox image
-bashdocker build -t prescan-sandbox /workspaces/prescan-backend/sandbox-image/
-This takes about 2 minutes. You should see Successfully tagged prescan-sandbox:latest at the end.
-Step 6 — Update the frontend API URL
-Your Codespace has a different URL from the project lead's. Find your URL:
-bashecho "https://${CODESPACE_NAME}-8000.app.github.dev"
-Open frontend/index.html and update this line near the top of the JavaScript section:
-javascriptconst API_BASE = 'https://YOUR-CODESPACE-URL-8000.app.github.dev';
+✔ Files should be several MB in size
+❌ If they appear in KB, the upload failed — try again
 
-Running the Project
-Start the API server
-bashcd /workspaces/prescan-backend
+5. Build the Docker Sandbox
+docker build -t prescan-sandbox /workspaces/prescan-backend/sandbox-image/
+
+⏳ This takes about 2 minutes
+✅ Success message:
+
+Successfully tagged prescan-sandbox:latest
+6. Update the Frontend API URL
+
+Your Codespace has a unique URL. Generate it with:
+
+echo "https://${CODESPACE_NAME}-8000.app.github.dev"
+
+Then:
+
+Open frontend/index.html
+Locate the API base URL in the JavaScript section
+Replace it with your Codespace URL:
+const API_BASE = 'https://YOUR-CODESPACE-URL-8000.app.github.dev';
+▶️ Running the Project
+Start the API Server
+cd /workspaces/prescan-backend
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-Make port 8000 public
-In VS Code, click the Ports tab at the bottom → right-click port 8000 → Port Visibility → Public
-Verify the server is running
-Open this URL in your browser:
-https://YOUR-CODESPACE-URL-8000.app.github.dev/health
-You should see:
-json{"status": "ok"}
-Open the frontend
-Double-click frontend/index.html on your local PC to open it in the browser. The frontend connects to your Codespace API automatically.
-Keep the server running in the background
-If you want the server to keep running after closing the terminal:
-bashnohup uvicorn main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 &
-Check if it is running:
-bashcurl http://localhost:8000/health
-View live logs:
-bashtail -f server.log
-Stop the server:
-bashpkill -f uvicorn
+Make Port Public
+Go to the Ports tab in VS Code
+Right-click port 8000
+Select Port Visibility → Public
+Verify the Server
 
-API Endpoints
-MethodEndpointDescriptionGET/healthCheck if server is runningPOST/api/analyzeScan an uploaded file for malwarePOST/api/analyze-urlScan a URL for phishing threatsPOST/api/contactSend a contact form email
-File Analysis — POST /api/analyze
-Request: multipart/form-data with a file field
-Accepted formats: .pdf, .txt, .docx, .csv, .md, .log
-Max file size: 10 MB (configurable in .env)
+Open in your browser:
+
+https://YOUR-CODESPACE-URL-8000.app.github.dev/health
+
+Expected response:
+
+{"status": "ok"}
+Open the Frontend
+Open frontend/index.html on your local machine
+It will automatically connect to your Codespace API
+Keep Server Running in Background
+nohup uvicorn main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 &
+Useful Commands
+
+Check status:
+
+curl http://localhost:8000/health
+
+View logs:
+
+tail -f server.log
+
+Stop server:
+
+pkill -f uvicorn
+📡 API Endpoints
+Method	Endpoint	Description
+GET	/health	Check if server is running
+POST	/api/analyze	Scan uploaded files
+POST	/api/analyze-url	Scan URLs for threats
+POST	/api/contact	Send contact form email
+📁 File Analysis — /api/analyze
+
+Request:
+multipart/form-data with a file field
+
+Supported formats:
+.pdf, .txt, .docx, .csv, .md, .log
+
+Max size: 10 MB (configurable in .env)
+
 Response:
-json{
+
+{
   "verdict": "MALICIOUS",
   "risk_score": 95,
   "confidence": 95,
   "flags": ["eval(", "exec(", "ransom"],
   "source": "random_forest_malware",
   "filename": "test.txt",
-  "sandbox_log": "FILE_SIZE: 38 bytes\nENTROPY: 4.05\n..."
+  "sandbox_log": "..."
 }
-URL Analysis — POST /api/analyze-url
+🌐 URL Analysis — /api/analyze-url
+
 Request:
-json{ "url": "https://example.com" }
+
+{ "url": "https://example.com" }
+
 Response:
-json{
+
+{
   "verdict": "CLEAN",
   "risk_score": 12,
   "confidence": 88,
@@ -157,44 +208,50 @@ json{
   "final_url": "https://example.com",
   "redirected": false
 }
-Verdict meanings
-VerdictRisk ScoreMeaningCLEAN0 – 39No threats detectedSUSPICIOUS40 – 74Potentially dangerous, review recommendedMALICIOUS75 – 100High confidence threat detected
-
-AI Models
-Malware Detection Model (prescan_model.joblib)
-
+⚖️ Verdict Meaning
+Verdict	Risk Score	Meaning
+CLEAN	0–39	No threats detected
+SUSPICIOUS	40–74	Potential risk — review recommended
+MALICIOUS	75–100	High confidence threat detected
+🤖 AI Models
+Malware Detection
+File: prescan_model.joblib
 Algorithm: Random Forest (200 trees)
-Trained on: EMBER 2018 dataset (150,000+ PE file samples)
-Features: Byte histogram, entropy, string patterns, file structure
+Dataset: EMBER 2018 (150K+ samples)
 Accuracy: ~97%
-Used for: File uploads
-
-URL Threat Detection Model (url_model.pkl)
-
+Features: Byte patterns, entropy, structure
+URL Detection
+File: url_model.pkl
 Algorithm: Random Forest
-Features: URL structure, domain patterns, page content analysis
-Used for: URL scanning
+Features: URL structure, domain patterns
+Fallback System
 
-Fallback Engine (rules_fallback.py)
-If either model file is not found, the system automatically falls back to a keyword-based rules engine. The source field in the response will show rules_fallback instead of random_forest_malware or random_forest_url.
+If models are unavailable, a rule-based engine is used automatically.
 
-Environment Variables
-VariableDescriptionExampleMALWARE_MODEL_PATHPath to malware model file./model/prescan_model.joblibURL_MODEL_PATHPath to URL model file./model/url_model.pklMAX_FILE_MBMaximum upload file size in MB10MAIL_EMAILGmail address for contact formvectorshield2026@gmail.comMAIL_PASSWORDGmail App Password (16 characters)xxxx xxxx xxxx xxxx
+🌍 Environment Variables
+Variable	Description	Example
+MALWARE_MODEL_PATH	Path to malware model	/model/prescan_model.joblib
+URL_MODEL_PATH	Path to URL model	/model/url_model.pkl
+MAX_FILE_MB	Max upload size	10
+MAIL_EMAIL	Gmail address	vectorshield2026@gmail.com
+MAIL_PASSWORD	Gmail App Password	xxxx xxxx xxxx xxxx
+⚠️ Important Notes
+❌ Never commit:
+.env
+model/*.joblib
+model/*.pkl
+⏱️ Codespace idle timeout:
+Set to 4 hours before demos to prevent sleep.
+🔓 Port visibility:
+Must manually set port 8000 to Public each time.
+📦 scikit-learn:
+Always use version 1.6.1
+🛡️ Docker sandbox:
+Runs in isolation with:
+No internet access
+30-second timeout
+Safe execution environment
 
-Important Notes
-Never commit these files to GitHub:
-
-.env — contains email credentials
-model/*.joblib and model/*.pkl — model files are too large and contain proprietary training
-
-Codespace idle timeout: Set your idle timeout to 4 hours before a demo to prevent the Codespace from sleeping. Go to github.com/settings/codespaces and update the setting.
-Port visibility: Every time you create a new Codespace, you must set port 8000 to Public in the Ports tab. It resets to Private by default.
-sklearn version: Always use scikit-learn==1.6.1. The models were trained with this version and will throw warnings or errors with newer versions.
-Docker sandbox: The sandbox runs files in a fully isolated container with no internet access and a 30-second timeout. It is safe to test with suspicious-looking files — they cannot escape the container.
-
-Contact
-Email: vectorshield2026@gmail.com
-Team: Prescan AI — Built for the 2026 hackathon
 ### 1. File Analysis (`POST /api/analyze`)
 
 Upload a file using `multipart/form-data`. The file will be passed through text extraction and isolated sandbox execution, before being scored for risk.
@@ -249,6 +306,12 @@ This application handles untrusted and potentially malicious artifacts.
 - **Sandboxing**: Docker containers are run with `network_disabled=True` and `mem_limit` to prevent resource exhaustion and lateral movement.
 - **Parser Isolation**: Only text is extracted from documents on the host; the full file binary is analyzed only within the sandbox.
 - **Production Note**: Do not expose this API directly to the internet without implementing rate-limiting and authentication via a proxy.
+
+
+
+📬 Contact
+Email: vectorshield2026@gmail.com
+Team: Prescan AI — Built for the 2026 IACE Competition
 
 ---
 Built with ❤️ for Security Automation
