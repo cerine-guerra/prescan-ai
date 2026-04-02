@@ -96,13 +96,15 @@ Use scikit-learn==1.6.1 exactly. Other versions will cause model loading errors.
 
 3. Create the .env File
 
-You can:
-
+You can 
 Request the .env file from the project lead, or
 Download it from the shared Google Drive folder
+"https://drive.google.com/drive/folders/13NHcqFmnz87cHfZBp0g_MJQDoLXMFQ2J?usp=drive_link"
+
 4. Upload AI Model Files
 
 The model files are too large for GitHub. Download them from Google Drive, then:
+https://drive.google.com/drive/folders/13NHcqFmnz87cHfZBp0g_MJQDoLXMFQ2J?usp=drive_link
 
 Open the file explorer in VS Code
 Right-click the model/ folder
