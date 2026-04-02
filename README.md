@@ -57,27 +57,7 @@ pwd
 # List files to verify
 ls -la
 
-### 1. File Analysis (`POST /api/analyze`)
 
-Upload a file using `multipart/form-data`. The file will be passed through text extraction and isolated sandbox execution, before being scored for risk.
-
-**Parameters**:
-
-- `file`: The document to be analyzed (PDF, DOCX, CSV, TXT, etc.). Maximum size configurable via `.env` (`MAX_FILE_MB`).
-
-**Response Example**:
-
-```json
-{
-  "verdict": "SUSPICIOUS",
-  "risk_score": 36,
-  "flags": ["eval(", "subprocess"],
-  "confidence": 72.0,
-  "source": "rules_fallback",
-  "filename": "suspicious.py",
-  "sandbox_log": "..."
-}
-```
 3️⃣ Install Dependencies
 bash
 # Install all required Python packages
@@ -141,6 +121,27 @@ Hover over the "Address" column for port 8000
 
 Click the 🌐 icon to open in browser
 
+### 1. File Analysis (`POST /api/analyze`)
+
+Upload a file using `multipart/form-data`. The file will be passed through text extraction and isolated sandbox execution, before being scored for risk.
+
+**Parameters**:
+
+- `file`: The document to be analyzed (PDF, DOCX, CSV, TXT, etc.). Maximum size configurable via `.env` (`MAX_FILE_MB`).
+
+**Response Example**:
+
+```json
+{
+  "verdict": "SUSPICIOUS",
+  "risk_score": 36,
+  "flags": ["eval(", "subprocess"],
+  "confidence": 72.0,
+  "source": "rules_fallback",
+  "filename": "suspicious.py",
+  "sandbox_log": "..."
+}
+```
 
 ### 2. URL Analysis (`POST /api/analyze-url`)
 
