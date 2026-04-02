@@ -31,45 +31,31 @@ prescan-backend/
 └── .env.example        # Environment variable template
 ```
 
-## 🚀 Getting Started
+## 🚀 How to Run the Project (For Team Members)
 
-### Prerequisites
+### 1️⃣ Create a Codespace
 
-- **Python 3.10+**
-- **Docker Engine** (required for sandbox execution)
-- **PyTorch** (for the ML aspect)
+1. Go to the GitHub repository
+2. Click the **Code** button (green)
+3. Select **Codespaces** tab
+4. Click **Create codespace on main**
 
-### Installation
+> ⏱️ This takes 2-3 minutes to build the environment
 
-1. **Clone and Setup Environment**:
+---
 
-   ```bash
-   cp .env.example .env
-   # Adjust environment variables in .env as needed
-   ```
+### 2️⃣ Check Your Path
 
-2. **Install Dependencies**:
+Once the Codespace opens, make sure you're in the correct directory:
 
-   ```bash
-   pip install -r requirements.txt
-   ```
 
-3. **Build the Sandbox**:
-   The sandbox isolates untrusted files during analysis.
+# Check where you are
+pwd
 
-   ```bash
-   cd sandbox-image
-   docker build -t prescan-sandbox .
-   cd ..
-   ```
+# You should be in: /workspaces/prescan-backend
 
-4. **Launch the API**:
-
-   ```bash
-   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-   ```
-
-## 🔌 API Endpoints
+# List files to verify
+ls -la
 
 ### 1. File Analysis (`POST /api/analyze`)
 
@@ -92,6 +78,69 @@ Upload a file using `multipart/form-data`. The file will be passed through text 
   "sandbox_log": "..."
 }
 ```
+3️⃣ Install Dependencies
+bash
+# Install all required Python packages
+pip install -r requirements.txt
+
+4️⃣ Download the AI Model ⚠️ IMPORTANT
+The AI model is too large for GitHub, so you need to download it separately.
+
+Download the model from Google Drive:
+
+download the AI model from this link : 
+https://colab.research.google.com/drive/1JP45Vq4RQf9ddk5b1JOgiIZXm2_kAPIl?usp=drive_link
+
+Place the model in the correct folder:
+
+bash
+# Create the model directory if it doesn't exist
+mkdir -p model
+
+# Move the downloaded model file into the model folder
+# The file is named : prescan_model.joblib
+Verify the model is in place:
+
+bash
+ls -la model/
+# You should see your model file(s)
+📁 Expected model location: /workspaces/prescan-backend/model/prescan_model.joblib
+
+5️⃣ Run the Server
+bash
+# Start the backend server
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+You'll see:
+
+text
+INFO:     Started server process
+INFO:     Uvicorn running on http://0.0.0.0:8000
+
+6️⃣ Make the Port Public
+Important: The port needs to be public so the frontend can connect.
+
+In the Codespace terminal, look for the Ports tab (next to Terminal)
+
+Find port 8000 in the list
+
+Right-click on it → Select "Port Visibility" → "Public"
+
+You should see the visibility change from 🔒 Private to 🌐 Public
+7️⃣ Access the Application
+Once the port is public, open your browser and go to:
+
+text
+https://scaling-adventure-pjr47779j6p3gjq-8000.app.github.dev
+Note: This is the shared API URL. When you run the server locally, your Codespace will have its own unique URL. Check the Ports tab for your specific URL.
+
+To find your unique URL:
+
+Go to the Ports tab
+
+Hover over the "Address" column for port 8000
+
+Click the 🌐 icon to open in browser
+
 
 ### 2. URL Analysis (`POST /api/analyze-url`)
 
