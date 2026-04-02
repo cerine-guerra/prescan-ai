@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 load_dotenv()
 from parser import extract_text
@@ -16,6 +18,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+@app.get("/")
+def serve_frontend():
+    return FileResponse("frontend/index.html")
 
 @app.on_event("startup")
 async def startup():

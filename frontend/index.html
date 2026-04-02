@@ -321,9 +321,7 @@
     <p class="text-slate-600 text-xs">© 2026 PrescanAI. All rights reserved.</p>
   </footer>
 
-  <!-- =========================================================
-       MODAL — displays REAL API results
-  ========================================================= -->
+  
   <transition name="fade">
     <div v-if="showModal" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="showModal=false">
       <div class="glass rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
@@ -399,12 +397,12 @@
     </div>
   </transition>
 
-</div><!-- #app -->
+</div>
 
 <script>
 const { createApp } = Vue;
 
-// ── CHANGE THIS if your Codespace URL ever changes ───────────
+//CHANGE THIS if the Codespace URL ever changes
 const API_BASE = 'https://scaling-adventure-pjr47779j6p3gjq-8000.app.github.dev';
 
 const i18n = {
@@ -483,12 +481,12 @@ createApp({
       apiError: null,
       contactForm: { email: '', message: '' }, msgSent: false,
       features: [
-        { icon:'🔬', bg:'linear-gradient(135deg,rgba(37,99,235,.3),rgba(37,99,235,.1))' },
-        { icon:'🧠', bg:'linear-gradient(135deg,rgba(109,40,217,.3),rgba(109,40,217,.1))' },
-        { icon:'📊', bg:'linear-gradient(135deg,rgba(57,255,110,.2),rgba(57,255,110,.05))' },
-        { icon:'🔒', bg:'linear-gradient(135deg,rgba(239,68,68,.2),rgba(239,68,68,.05))' },
-        { icon:'⚡', bg:'linear-gradient(135deg,rgba(234,179,8,.2),rgba(234,179,8,.05))' },
-        { icon:'🌐', bg:'linear-gradient(135deg,rgba(20,184,166,.2),rgba(20,184,166,.05))' },
+        { icon:'', bg:'linear-gradient(135deg,rgba(37,99,235,.3),rgba(37,99,235,.1))' },
+        { icon:'', bg:'linear-gradient(135deg,rgba(109,40,217,.3),rgba(109,40,217,.1))' },
+        { icon:'', bg:'linear-gradient(135deg,rgba(57,255,110,.2),rgba(57,255,110,.05))' },
+        { icon:'', bg:'linear-gradient(135deg,rgba(239,68,68,.2),rgba(239,68,68,.05))' },
+        { icon:'', bg:'linear-gradient(135deg,rgba(234,179,8,.2),rgba(234,179,8,.05))' },
+        { icon:'', bg:'linear-gradient(135deg,rgba(20,184,166,.2),rgba(20,184,166,.05))' },
       ],
       team: [
         { name:'Alex Chen',   role:'AI Research Lead',  initials:'AC', c1:'#1e3a8a', c2:'#4f46e5' },
@@ -501,10 +499,10 @@ createApp({
         { name:'Mia Dupont',  role:'NLP Researcher',     initials:'MD', c1:'#3b0764', c2:'#9333ea' },
       ],
       socials: [
-        { name:'Twitter / X', icon:'🐦', url:'#' },
-        { name:'LinkedIn',    icon:'💼', url:'#' },
-        { name:'GitHub',      icon:'⚙️', url:'#' },
-        { name:'Discord',     icon:'💬', url:'#' },
+        { name:'Twitter / X', icon:'', url:'#' },
+        { name:'LinkedIn',    icon:'', url:'#' },
+        { name:'GitHub',      icon:'', url:'#' },
+        { name:'Discord',     icon:'', url:'#' },
       ],
     };
   },
@@ -533,7 +531,7 @@ createApp({
       const interval = setInterval(() => { if (this.progressLabel < 99) this.progressLabel += 3; else clearInterval(interval); }, 84);
     },
 
-    // Fires when the 2.8s CSS animation ends → then calls the real API
+    
     onProgressEnd() {
       this.progressLabel = 100;
       this.apiWaiting = true;
