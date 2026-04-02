@@ -43,24 +43,31 @@ A rules-based fallback engine that activates if models are unavailable
 Tech Stack
 LayerTechnologyFrontendVue.js 3, Tailwind CSS, jsPDFBackendPython, FastAPI, UvicornAI Modelsscikit-learn 1.6.1, Random ForestSandboxDocker (isolated container)File ParsingPyPDF2, python-docx, pandasURL Scanninghttpx (async HTTP client)Emailaiosmtplib (Gmail SMTP)HostingGitHub Codespaces
 
-Project Structure
+📁 Project Structure
+```
 prescan-backend/
+│
 ├── frontend/
-│   └── index.html              ← Vue.js single-page frontend
-├── main.py                     ← FastAPI app — all API routes
-├── model_server.py             ← AI model loader and predict functions
-├── parser.py                   ← File text extractor (PDF, DOCX, CSV, TXT)
-├── rules_fallback.py           ← Keyword-based fallback detection engine
-├── sandbox.py                  ← Docker sandbox wrapper
-├── sandbox-image/
-│   ├── Dockerfile              ← Sandbox container definition
-│   └── analyze.py              ← Behavior monitor (runs inside container)
-├── model/
-│   ├── prescan_model.joblib    ← Malware detection model (not on GitHub)
-│   └── url_model.pkl           ← URL threat detection model (not on GitHub)
-├── .env                        ← Secret credentials (not on GitHub)
-├── .gitignore
-└── README.md
+│   └── index.html                # Vue.js single-page frontend
+│
+├── main.py                       # FastAPI app — API routes entrypoint
+├── model_server.py               # AI model loading & prediction logic
+├── parser.py                     # File text extraction (PDF, DOCX, CSV, TXT)
+├── rules_fallback.py             # Keyword-based fallback detection engine
+├── sandbox.py                    # Docker sandbox wrapper
+│
+├── sandbox-image/               # Sandbox environment
+│   ├── Dockerfile                # Container definition
+│   └── analyze.py                # Behavior analysis (runs inside container)
+│
+├── model/                       # AI models (not tracked in Git)
+│   ├── prescan_model.joblib      # Malware detection model
+│   └── url_model.pkl             # URL threat detection model
+│
+├── .env                          # Environment variables (not committed)
+├── .gitignore                    # Git ignore rules
+└── README.md                     # Project documentation
+```
 
 🚀 Getting Started (New Collaborator)
 
