@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prescan AI</title>
+  <title>Prescan AI | Intelligent Threat Detection</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
@@ -63,8 +64,48 @@
     .modal-backdrop { background: rgba(0,0,10,0.75); backdrop-filter: blur(8px); }
     .feature-card { transition: transform .3s, box-shadow .3s; }
     .feature-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(124,58,237,0.25); }
-    .avatar-ring { border: 2px solid transparent; background-clip: padding-box; transition: border-color .3s; }
-    .team-card:hover .avatar-ring { border-color: var(--neon); }
+    .team-triangle {
+      position: relative;
+      width: 180px;
+      background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(109,40,217,0.12));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px;
+      backdrop-filter: blur(4px);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .team-triangle:hover {
+      transform: translateY(-6px);
+      border-color: var(--neon);
+      box-shadow: 0 12px 28px rgba(57,255,110,0.15);
+    }
+    .avatar-square {
+      width: 110px;
+      height: 110px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #1e2a5e, #0f1a44);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      font-weight: 800;
+      font-family: 'Syne', sans-serif;
+      color: var(--neon);
+      text-shadow: 0 0 6px rgba(57,255,110,0.5);
+      box-shadow: 0 12px 24px -8px rgba(0,0,0,0.5);
+      transition: all 0.25s;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .team-triangle:hover .avatar-square {
+      transform: scale(1.02);
+      box-shadow: 0 0 0 2px rgba(57,255,110,0.4);
+    }
+    .avatar-square img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(139,92,246,0.4), transparent); }
     .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
     .reveal.visible { opacity: 1; transform: none; }
@@ -75,15 +116,38 @@
     .ai-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #e2e8f0; transition: border-color .2s, box-shadow .2s; border-radius: .5rem; padding: .75rem 1rem; width: 100%; outline: none; }
     .ai-input:focus { border-color: #6d28d9; box-shadow: 0 0 0 3px rgba(109,40,217,0.25); }
     .ai-input::placeholder { color: rgba(255,255,255,0.3); }
-    .social-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); transition: background .25s, transform .25s, border-color .25s; }
-    .social-btn:hover { background: rgba(57,255,110,0.1); border-color: var(--neon); transform: translateY(-3px); }
-    /* Verdict colors */
+    .social-icon-white { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); transition: all .25s; width: 48px; height: 48px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.6rem; color: #ffffff; }
+    .social-icon-white:hover { background: rgba(57,255,110,0.15); border-color: var(--neon); transform: translateY(-4px); color: var(--neon); }
     .verdict-malicious { color: #f87171; text-shadow: 0 0 8px rgba(248,113,113,0.6); }
     .verdict-suspicious { color: #facc15; text-shadow: 0 0 8px rgba(250,204,21,0.6); }
     .verdict-clean { color: var(--neon); text-shadow: 0 0 8px rgba(57,255,110,0.6); }
-    /* Spinner */
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { width: 14px; height: 14px; border: 2px solid rgba(57,255,110,0.2); border-top-color: var(--neon); border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; vertical-align: middle; margin-right: 6px; }
+    .github-hint {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.7rem;
+    }
+    .team-triangle:hover .github-hint {
+      opacity: 1;
+    }
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    /* Scope logo pulse animation */
+    @keyframes scopePulse {
+      0% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 0.6; transform: scale(1); }
+    }
+    .scope-logo {
+      animation: scopePulse 2s ease-in-out infinite;
+    }
   </style>
 
   <script>
@@ -94,12 +158,19 @@
 <body>
 <div id="app">
 
-  <!-- NAVBAR -->
+  <!-- NAVBAR with SCOPE logo -->
   <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-16">
     <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg,#2563eb,#7c3aed);">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#39ff6e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <div class="w-8 h-8">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+          <circle cx="50" cy="50" r="42" stroke="#39ff6e" stroke-width="2.5" stroke-opacity="0.8"/>
+          <circle cx="50" cy="50" r="32" stroke="#39ff6e" stroke-width="1.5" stroke-opacity="0.5" stroke-dasharray="6 4"/>
+          <line x1="50" y1="4" x2="50" y2="20" stroke="#39ff6e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="50" y1="80" x2="50" y2="96" stroke="#39ff6e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="4" y1="50" x2="20" y2="50" stroke="#39ff6e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="80" y1="50" x2="96" y2="50" stroke="#39ff6e" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="6" fill="#39ff6e" stroke="#39ff6e" stroke-width="2"/>
+          <circle cx="50" cy="50" r="14" stroke="#60a5fa" stroke-width="1.5" stroke-opacity="0.6"/>
         </svg>
       </div>
       <span class="font-display font-bold text-white text-lg tracking-tight">Prescan<span class="neon-text">AI</span></span>
@@ -112,7 +183,8 @@
     <div class="flex items-center gap-3">
       <div class="relative">
         <button @click="langOpen = !langOpen" class="flex items-center gap-2 neon-btn rounded-lg px-3 py-1.5 text-xs font-display font-semibold">
-          <span>🌐</span><span>{{ currentLang.toUpperCase() }}</span>
+          <i class="fa-solid fa-globe"></i>
+          <span>{{ currentLang.toUpperCase() }}</span>
           <svg class="w-3 h-3 transition-transform" :class="langOpen ? 'rotate-180':''" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
         </button>
         <div v-if="langOpen" class="absolute right-0 top-10 glass rounded-xl overflow-hidden shadow-2xl w-28 z-50">
@@ -135,19 +207,29 @@
     </div>
   </nav>
 
-  <!-- HOME SECTION -->
+  <!-- HOME SECTION with SCOPE logo above title -->
   <section id="home" class="min-h-screen flex flex-col items-center justify-center pt-24 pb-16 px-4 grid-bg relative overflow-hidden">
     <div class="hero-blob w-96 h-96 bg-blue-700 top-10 -left-24"></div>
     <div class="hero-blob w-80 h-80 bg-purple-700 bottom-10 -right-16"></div>
     <div class="hero-blob w-60 h-60 bg-indigo-600 top-1/3 left-1/2 -translate-x-1/2"></div>
     <div class="relative z-10 max-w-3xl w-full text-center">
+      <!-- Scope Logo above title -->
       <div class="flex justify-center mb-6">
-        <div class="w-20 h-20 rounded-2xl flex items-center justify-center shadow-2xl" style="background: linear-gradient(135deg,#1a3a8f,#6d28d9);">
-          <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-            <circle cx="24" cy="24" r="18" stroke="#39ff6e" stroke-width="2" stroke-dasharray="4 2"/>
-            <path d="M24 8v16l10 10" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="24" cy="24" r="3" fill="#39ff6e"/>
-            <path d="M8 24h4M36 24h4M24 8v4M24 36v4" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"/>
+        <div class="w-32 h-32 rounded-2xl flex items-center justify-center shadow-2xl p-3 glass scope-logo">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+            <circle cx="50" cy="50" r="44" stroke="#39ff6e" stroke-width="2.5" stroke-opacity="0.9"/>
+            <circle cx="50" cy="50" r="34" stroke="#39ff6e" stroke-width="1.5" stroke-opacity="0.5" stroke-dasharray="8 6"/>
+            <circle cx="50" cy="50" r="24" stroke="#60a5fa" stroke-width="1.2" stroke-opacity="0.4" stroke-dasharray="4 6"/>
+            <line x1="50" y1="2" x2="50" y2="18" stroke="#39ff6e" stroke-width="3" stroke-linecap="round"/>
+            <line x1="50" y1="82" x2="50" y2="98" stroke="#39ff6e" stroke-width="3" stroke-linecap="round"/>
+            <line x1="2" y1="50" x2="18" y2="50" stroke="#39ff6e" stroke-width="3" stroke-linecap="round"/>
+            <line x1="82" y1="50" x2="98" y2="50" stroke="#39ff6e" stroke-width="3" stroke-linecap="round"/>
+            <line x1="21.5" y1="21.5" x2="32.5" y2="32.5" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7"/>
+            <line x1="78.5" y1="21.5" x2="67.5" y2="32.5" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7"/>
+            <line x1="21.5" y1="78.5" x2="32.5" y2="67.5" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7"/>
+            <line x1="78.5" y1="78.5" x2="67.5" y2="67.5" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7"/>
+            <circle cx="50" cy="50" r="8" fill="#39ff6e" stroke="#39ff6e" stroke-width="2"/>
+            <circle cx="50" cy="50" r="16" stroke="#60a5fa" stroke-width="1.5" stroke-opacity="0.7"/>
           </svg>
         </div>
       </div>
@@ -167,35 +249,29 @@
 
       <!-- Input Card -->
       <div class="glass rounded-2xl p-6 max-w-xl mx-auto shadow-2xl">
-        <!-- File Upload -->
         <div v-if="inputMode==='file'">
           <div class="drop-zone rounded-xl p-10 text-center cursor-pointer mb-4"
             :class="isDragging ? 'active' : ''"
             @dragover.prevent="isDragging=true" @dragleave="isDragging=false"
             @drop.prevent="handleDrop" @click="$refs.fileInput.click()">
             <input type="file" ref="fileInput" class="hidden" @change="handleFileChange" accept=".pdf,.txt,.docx,.csv" />
-            <svg class="w-12 h-12 mx-auto mb-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-            </svg>
+            <i class="fa-regular fa-file-lines text-4xl text-slate-500 mb-3 block"></i>
             <p class="text-slate-400 text-sm mb-1">{{ t('drop_hint') }}</p>
-            <p v-if="selectedFile" class="neon-text text-sm font-semibold mt-2">📄 {{ selectedFile.name }}</p>
+            <p v-if="selectedFile" class="neon-text text-sm font-semibold mt-2"><i class="fa-regular fa-file-pdf mr-1"></i> {{ selectedFile.name }}</p>
             <p v-else class="text-slate-600 text-xs">PDF, TXT, DOCX, CSV</p>
           </div>
         </div>
-        <!-- URL Input -->
         <div v-else class="mb-4">
           <label class="block text-slate-400 text-xs mb-2 text-left">{{ t('paste_url') }}</label>
-          <input v-model="urlInput" type="url" class="ai-input" :placeholder="t('url_placeholder')" />
+          <input v-model="urlInput" type="url" class="ai-input" :placeholder="t('url_placeholder')" @keyup.enter="runAnalysis" />
         </div>
 
-        <!-- Submit -->
         <button @click="runAnalysis" :disabled="analyzing"
           class="w-full font-display font-semibold text-sm py-3 rounded-xl transition-all"
           :class="analyzing ? 'opacity-50 cursor-not-allowed bg-slate-700 text-slate-400' : 'neon-btn'">
           {{ analyzing ? t('analyzing') : t('analyze') }}
         </button>
 
-        <!-- Progress Bar -->
         <div v-if="analyzing" class="mt-4">
           <div class="flex justify-between text-xs text-slate-500 mb-1">
             <span>
@@ -212,9 +288,8 @@
           </div>
         </div>
 
-        <!-- Error -->
         <div v-if="apiError" class="mt-3 p-3 rounded-lg text-xs text-red-400 bg-red-400/10 border border-red-400/20">
-          ⚠️ {{ apiError }}
+          <i class="fa-solid fa-triangle-exclamation mr-1"></i> {{ apiError }}
         </div>
       </div>
     </div>
@@ -230,16 +305,53 @@
         <h2 class="font-display font-extrabold text-4xl md:text-5xl mt-3 text-white">{{ t('features_title') }}</h2>
         <p class="text-slate-500 mt-3 text-sm max-w-md mx-auto">{{ t('features_sub') }}</p>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div v-for="(feat, i) in features" :key="i" class="feature-card glass rounded-2xl p-6 flex flex-col gap-4 reveal">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" :style="'background:'+feat.bg">{{ feat.icon }}</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="feature-card glass rounded-2xl p-6 flex flex-col gap-4 reveal transition-all">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background:linear-gradient(135deg,#2563eb30,#7c3aed30);">
+            <i class="fa-regular fa-file-zipper text-neon"></i>
+          </div>
           <div>
-            <div class="h-4 rounded bg-white/10 mb-2 w-3/4"></div>
-            <div class="h-3 rounded bg-white/5 mb-1 w-full"></div>
-            <div class="h-3 rounded bg-white/5 w-2/3"></div>
+            <h3 class="font-display font-bold text-white text-xl mb-2">{{ t('file_scan_title') }}</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">{{ t('file_scan_desc') }}</p>
           </div>
           <div class="mt-auto pt-3 border-t border-white/10">
-            <span class="text-xs font-display font-semibold text-slate-500 uppercase tracking-widest">{{ t('coming_soon') }}</span>
+            <span class="text-xs font-display font-semibold text-neon uppercase tracking-wider"><i class="fa-regular fa-circle-check mr-1"></i> {{ t('available_now') }}</span>
+          </div>
+        </div>
+        <div class="feature-card glass rounded-2xl p-6 flex flex-col gap-4 reveal transition-all">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background:linear-gradient(135deg,#a78bfa30,#39ff6e30);">
+            <i class="fa-solid fa-link text-neon"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-white text-xl mb-2">{{ t('url_scan_title') }}</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">{{ t('url_scan_desc') }}</p>
+          </div>
+          <div class="mt-auto pt-3 border-t border-white/10">
+            <span class="text-xs font-display font-semibold text-neon uppercase tracking-wider"><i class="fa-regular fa-circle-check mr-1"></i> {{ t('available_now') }}</span>
+          </div>
+        </div>
+        <div class="feature-card glass rounded-2xl p-6 flex flex-col gap-4 reveal transition-all opacity-90">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background:linear-gradient(135deg,#facc1530,#f9731630);">
+            <i class="fa-brands fa-chrome text-slate-300"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-white text-xl mb-2">{{ t('web_ext_title') }}</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">{{ t('web_ext_desc') }}</p>
+          </div>
+          <div class="mt-auto pt-3 border-t border-white/10">
+            <span class="text-xs font-display font-semibold text-amber-400 uppercase tracking-wider"><i class="fa-regular fa-clock mr-1"></i> {{ t('coming_soon') }}</span>
+          </div>
+        </div>
+        <div class="feature-card glass rounded-2xl p-6 flex flex-col gap-4 reveal transition-all opacity-90">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background:linear-gradient(135deg,#ec489930,#be185d30);">
+            <i class="fa-regular fa-envelope text-slate-300"></i>
+          </div>
+          <div>
+            <h3 class="font-display font-bold text-white text-xl mb-2">{{ t('email_scan_title') }}</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">{{ t('email_scan_desc') }}</p>
+          </div>
+          <div class="mt-auto pt-3 border-t border-white/10">
+            <span class="text-xs font-display font-semibold text-amber-400 uppercase tracking-wider"><i class="fa-regular fa-clock mr-1"></i> {{ t('coming_soon') }}</span>
           </div>
         </div>
       </div>
@@ -253,30 +365,27 @@
     <div class="max-w-5xl mx-auto">
       <div class="text-center mb-14 reveal">
         <span class="neon-text text-xs font-display font-semibold uppercase tracking-widest">{{ t('about_tag') }}</span>
-        <h2 class="font-display font-extrabold text-4xl md:text-5xl mt-3 text-white">{{ t('about_title') }}</h2>
+        <h2 class="font-display font-extrabold text-5xl md:text-6xl mt-3 bg-gradient-to-r from-white via-neon to-purple-400 bg-clip-text text-transparent">VectorShield</h2>
         <p class="text-slate-400 mt-4 text-base max-w-xl mx-auto">{{ t('about_desc') }}</p>
       </div>
-      <div class="flex justify-center mb-14 reveal">
-        <div class="w-24 h-24 rounded-2xl flex items-center justify-center shadow-2xl" style="background: linear-gradient(135deg,#1a3a8f,#6d28d9);">
-          <svg width="52" height="52" viewBox="0 0 48 48" fill="none">
-            <circle cx="24" cy="24" r="18" stroke="#39ff6e" stroke-width="2" stroke-dasharray="4 2"/>
-            <path d="M24 8v16l10 10" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="24" cy="24" r="3" fill="#39ff6e"/>
-            <path d="M8 24h4M36 24h4M24 8v4M24 36v4" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-        <div v-for="(member, i) in team" :key="i" class="team-card flex flex-col items-center gap-3 reveal">
-          <div class="avatar-ring rounded-full overflow-hidden w-20 h-20 shadow-xl" style="border: 2px solid rgba(255,255,255,0.15);">
-            <div class="w-full h-full flex items-center justify-center font-display font-bold text-2xl" :style="'background: linear-gradient(135deg,'+member.c1+','+member.c2+')'">{{ member.initials }}</div>
+      <div class="flex flex-wrap justify-center gap-8 mt-12">
+        <div v-for="(member, idx) in coreTeam" :key="idx" 
+             class="team-triangle flex flex-col items-center text-center p-6 w-[200px] relative"
+             @click="openGithub(member.github)">
+          <div class="avatar-square flex items-center justify-center">
+            <span class="text-4xl font-black">{{ member.initials }}</span>
           </div>
-          <div class="text-center">
-            <p class="font-display font-semibold text-white text-sm">{{ member.name }}</p>
-            <p class="text-slate-500 text-xs mt-0.5">{{ member.role }}</p>
+          <h4 class="font-display font-bold text-white text-lg mt-2">{{ member.name }}</h4>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed px-2">{{ member.description }}</p>
+          <div class="github-hint">
+            <i class="fa-brands fa-github text-neon text-xs"></i>
+            <span class="text-[10px] text-slate-500 ml-1">GitHub →</span>
           </div>
         </div>
       </div>
+      <p class="text-center text-slate-500 text-xs mt-8 reveal">
+        <i class="fa-regular fa-hand-pointer mr-1"></i> {{ t('click_hint') }}
+      </p>
     </div>
   </section>
 
@@ -290,9 +399,9 @@
         <h2 class="font-display font-extrabold text-4xl md:text-5xl mt-3 text-white">{{ t('contact_title') }}</h2>
         <p class="text-slate-400 mt-3 text-base">{{ t('contact_sub') }}</p>
       </div>
-      <div class="flex justify-center gap-4 flex-wrap mb-12 reveal">
-        <a v-for="social in socials" :key="social.name" :href="social.url" target="_blank" class="social-btn flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-display font-semibold text-slate-300 no-underline">
-          <span class="text-lg">{{ social.icon }}</span><span>{{ social.name }}</span>
+      <div class="flex justify-center gap-6 flex-wrap mb-12 reveal">
+        <a v-for="social in socials" :key="social.name" :href="social.url" target="_blank" class="social-icon-white" :class="social.iconClass">
+          <i :class="social.icon"></i>
         </a>
       </div>
       <div class="glass rounded-2xl p-8 max-w-xl mx-auto reveal shadow-2xl">
@@ -305,58 +414,58 @@
           <textarea v-model="contactForm.message" rows="4" class="ai-input resize-none" :placeholder="t('message_placeholder')"></textarea>
         </div>
         <button @click="sendMessage" class="w-full neon-btn font-display font-semibold text-sm py-3 rounded-xl">{{ t('send') }}</button>
-        <p v-if="msgSent" class="text-center neon-text text-sm mt-4 font-semibold">✓ {{ t('msg_sent') }}</p>
+        <p v-if="msgSent" class="text-center neon-text text-sm mt-4 font-semibold"><i class="fa-regular fa-paper-plane mr-1"></i> {{ t('msg_sent') }}</p>
       </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
+  <!-- FOOTER with SCOPE logo -->
   <footer class="border-t border-white/10 py-8 px-4 text-center">
     <div class="flex items-center justify-center gap-2 mb-2">
-      <div class="w-6 h-6 rounded flex items-center justify-center" style="background: linear-gradient(135deg,#2563eb,#7c3aed);">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#39ff6e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="w-6 h-6">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+          <circle cx="50" cy="50" r="42" stroke="#39ff6e" stroke-width="2.5" stroke-opacity="0.8"/>
+          <circle cx="50" cy="50" r="32" stroke="#39ff6e" stroke-width="1.5" stroke-opacity="0.5" stroke-dasharray="6 4"/>
+          <line x1="50" y1="4" x2="50" y2="20" stroke="#39ff6e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="50" y1="80" x2="50" y2="96" stroke="#39ff6e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="4" y1="50" x2="20" y2="50" stroke="#39ff6e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="80" y1="50" x2="96" y2="50" stroke="#39ff6e" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="6" fill="#39ff6e"/>
+        </svg>
       </div>
       <span class="font-display font-bold text-white text-sm">Prescan<span class="neon-text">AI</span></span>
     </div>
     <p class="text-slate-600 text-xs">© 2026 PrescanAI. All rights reserved.</p>
   </footer>
 
-  
+  <!-- Modal -->
   <transition name="fade">
     <div v-if="showModal" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="showModal=false">
       <div class="glass rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-        <!-- Header -->
         <div class="px-6 py-4 border-b border-white/10 flex items-center justify-between" style="background: linear-gradient(90deg, rgba(37,99,235,0.2), rgba(109,40,217,0.2));">
           <div class="flex items-center gap-2">
-            <span class="neon-text text-lg">✦</span>
+            <i class="fa-solid fa-shield-haltered text-neon"></i>
             <span class="font-display font-bold text-white">{{ t('analysis_ready') }}</span>
           </div>
-          <button @click="showModal=false" class="text-slate-400 hover:text-white transition-colors text-xl leading-none">×</button>
+          <button @click="showModal=false" class="text-slate-400 hover:text-white transition-colors text-2xl leading-none">×</button>
         </div>
-        <!-- Body -->
         <div class="px-6 py-5">
-          <div class="glass rounded-xl p-4 mb-4 max-h-72 overflow-y-auto text-sm text-slate-300 leading-relaxed" style="border-color: rgba(57,255,110,0.15); background: rgba(57,255,110,0.03);">
-
-            <!-- Verdict row -->
+          <div class="glass rounded-xl p-4 mb-4 max-h-72 overflow-y-auto text-sm text-slate-300 leading-relaxed">
             <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
               <span class="font-display font-bold text-white text-base">{{ t('verdict') }}</span>
               <span class="font-display font-extrabold text-xl"
                 :class="{
                   'verdict-malicious': analysisResult && analysisResult.verdict === 'MALICIOUS',
                   'verdict-suspicious': analysisResult && analysisResult.verdict === 'SUSPICIOUS',
-                  'verdict-clean':     analysisResult && analysisResult.verdict === 'CLEAN'
+                  'verdict-clean': analysisResult && analysisResult.verdict === 'CLEAN'
                 }">
                 {{ analysisResult ? analysisResult.verdict : '—' }}
               </span>
             </div>
-
-            <!-- Confidence -->
             <div class="flex items-center justify-between mb-4">
               <span class="text-slate-400 text-xs uppercase tracking-widest font-display">{{ t('confidence') }}</span>
               <span class="text-white font-semibold">{{ analysisResult ? analysisResult.confidence + '%' : '—' }}</span>
             </div>
-
-            <!-- Risk Score bar -->
             <p class="font-semibold text-white mb-2">{{ t('risk_score') }}</p>
             <div class="h-2 rounded-full bg-white/10 overflow-hidden mt-1 mb-1">
               <div class="h-full rounded-full transition-all duration-700"
@@ -364,33 +473,19 @@
               </div>
             </div>
             <p class="text-xs mb-4 text-slate-500">{{ analysisResult ? analysisResult.risk_score : 0 }} / 100</p>
-
-            <!-- Flags -->
             <p class="font-semibold text-white mb-2">{{ t('flags') }}</p>
             <div v-if="analysisResult && analysisResult.flags && analysisResult.flags.length > 0">
-              <ul class="space-y-1">
-                <li v-for="flag in analysisResult.flags" :key="flag" class="flex items-center gap-2 text-xs text-red-300">
-                  <span class="text-red-400">⚑</span> {{ flag }}
-                </li>
-              </ul>
+              <ul class="space-y-1"><li v-for="flag in analysisResult.flags" :key="flag" class="flex items-center gap-2 text-xs text-red-300"><i class="fa-solid fa-flag-checkered text-red-400"></i> {{ flag }}</li></ul>
             </div>
             <p v-else class="text-xs text-slate-500 italic">{{ t('no_flags') }}</p>
-
-            <!-- File / URL info -->
             <div class="mt-4 pt-3 border-t border-white/10 space-y-1">
-              <p v-if="analysisResult && analysisResult.filename" class="text-xs text-slate-500">📄 {{ analysisResult.filename }}</p>
-              <p v-if="analysisResult && analysisResult.url" class="text-xs text-slate-500 truncate">🔗 {{ analysisResult.url }}</p>
-              <p v-if="analysisResult && analysisResult.redirected" class="text-xs text-yellow-400">↪ {{ t('redirected') }}: {{ analysisResult.final_url }}</p>
-              <p class="text-xs text-slate-600">{{ t('source') }}: {{ analysisResult ? analysisResult.source : '—' }}</p>
+              <p v-if="analysisResult && analysisResult.filename" class="text-xs text-slate-500"><i class="fa-regular fa-file"></i> {{ analysisResult.filename }}</p>
+              <p v-if="analysisResult && analysisResult.url" class="text-xs text-slate-500 truncate"><i class="fa-solid fa-link"></i> {{ analysisResult.url }}</p>
+              <p class="text-xs text-slate-600"><i class="fa-regular fa-microchip"></i> {{ t('source') }}: {{ analysisResult ? analysisResult.source : '—' }}</p>
             </div>
           </div>
-
-          <!-- PDF Download -->
           <button @click="downloadPDF" class="w-full flex items-center justify-center gap-2 neon-btn font-display font-semibold text-sm py-3 rounded-xl">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-            </svg>
-            {{ t('download_pdf') }}
+            <i class="fa-regular fa-file-pdf"></i> {{ t('download_pdf') }}
           </button>
         </div>
       </div>
@@ -401,8 +496,6 @@
 
 <script>
 const { createApp } = Vue;
-
-//CHANGE THIS if the Codespace URL ever changes
 const API_BASE = 'https://scaling-adventure-pjr47779j6p3gjq-8000.app.github.dev';
 
 const i18n = {
@@ -414,57 +507,60 @@ const i18n = {
     paste_url: 'Target URL', url_placeholder: 'https://example.com/file-or-page',
     analyze: 'Scan Now', analyzing: 'Scanning…', processing: 'Running analysis…',
     waiting_api: 'Waiting for AI response…',
-    features_tag: "What's Coming", features_title: 'Powerful Features', features_sub: 'Next-generation capabilities rolling out soon.',
-    coming_soon: 'Coming Soon',
-    about_tag: 'Our Team', about_title: 'Built by Researchers', about_desc: 'A passionate team combining AI research, security expertise, and engineering to redefine threat detection.',
-    contact_tag: 'Get in Touch', contact_title: 'Contact Us', contact_sub: 'Reach out on social media or send us a message.',
+    features_tag: "Advanced Tools", features_title: 'Cutting-Edge Protection', features_sub: 'Next-generation security at your fingertips.',
+    coming_soon: 'Coming Soon', available_now: 'Available Now',
+    file_scan_title: 'File Scanning', file_scan_desc: 'Deep scan documents, PDFs, and executables for hidden threats and malware signatures.',
+    url_scan_title: 'URL Scanning', url_scan_desc: 'Real-time analysis of links, redirect chains, and domain reputation.',
+    web_ext_title: 'Web Extension', web_ext_desc: 'Browser extension that protects you while browsing — real-time alerts.',
+    email_scan_title: 'Email Scanning', email_scan_desc: 'Scan attachments & embedded links in emails before you click.',
+    about_tag: 'Core Team', about_desc: 'AI security developers united to redefine threat detection.',
+    click_hint: 'Click on any member to view their GitHub profile',
+    contact_tag: 'Get in Touch', contact_title: 'Contact Us', contact_sub: 'Reach out via our social channels.',
     email_label: 'Email', email_placeholder: 'you@example.com',
     message_label: 'Message', message_placeholder: 'Tell us about your project…',
     send: 'Send Message', msg_sent: 'Message sent successfully!',
     analysis_ready: 'Scan Complete',
-    verdict: '🔍 Verdict', confidence: 'Confidence', risk_score: '⚠️ Risk Score',
-    flags: '🚩 Threat Flags', no_flags: 'No threat indicators detected.',
-    redirected: 'Redirected to', source: 'Engine', download_pdf: 'Download PDF Report',
+    verdict: 'Verdict', confidence: 'Confidence', risk_score: 'Risk Score',
+    flags: 'Threat Flags', no_flags: 'No threat indicators detected.',
+    source: 'Engine', download_pdf: 'Download PDF Report',
   },
-  fr: {
-    home: 'Accueil', features: 'Fonctionnalités', about: 'À propos', contact: 'Contact',
-    hero_desc: "Détection de menaces intelligente par l'IA. Uploadez un fichier ou collez une URL pour scanner instantanément.",
-    file: 'Fichier', url: 'URL',
-    drop_hint: 'Glissez-déposez votre fichier ici, ou cliquez pour parcourir',
-    paste_url: 'URL cible', url_placeholder: 'https://exemple.com/fichier',
-    analyze: 'Scanner', analyzing: 'Analyse…', processing: 'Analyse en cours…',
-    waiting_api: "En attente de l'IA…",
-    features_tag: 'Bientôt Disponible', features_title: 'Fonctionnalités Puissantes', features_sub: 'Des capacités de nouvelle génération arrivent bientôt.',
-    coming_soon: 'Bientôt',
-    about_tag: 'Notre Équipe', about_title: 'Construit par des Chercheurs', about_desc: "Une équipe passionnée combinant recherche en IA et expertise en sécurité.",
-    contact_tag: 'Nous Contacter', contact_title: 'Contactez-nous', contact_sub: 'Retrouvez-nous sur les réseaux sociaux ou envoyez-nous un message.',
-    email_label: 'E-mail', email_placeholder: 'vous@exemple.com',
-    message_label: 'Message', message_placeholder: 'Parlez-nous de votre projet…',
-    send: 'Envoyer', msg_sent: 'Message envoyé avec succès !',
-    analysis_ready: 'Scan Terminé',
-    verdict: '🔍 Verdict', confidence: 'Confiance', risk_score: '⚠️ Score de Risque',
-    flags: '🚩 Indicateurs de Menace', no_flags: 'Aucun indicateur de menace détecté.',
-    redirected: 'Redirigé vers', source: 'Moteur', download_pdf: 'Télécharger le Rapport PDF',
+  fr: { 
+    home: 'Accueil', features: 'Fonctions', about: 'Équipe', contact: 'Contact', 
+    hero_desc: "Détection IA. Scannez fichier ou URL.", file: 'Fichier', url: 'URL', 
+    drop_hint: 'Glissez fichier', paste_url: 'URL cible', url_placeholder: 'https://exemple.com', 
+    analyze: 'Scanner', analyzing: 'Analyse…', processing: 'Traitement…', waiting_api: 'Attente IA…', 
+    features_tag: 'Protection Avancée', features_title: 'Sécurité Next-Gen', features_sub: 'Détection intelligente', 
+    coming_soon: 'Bientôt', available_now: 'Disponible', 
+    file_scan_title: 'Scan Fichier', file_scan_desc: 'Analyse approfondie des documents.', 
+    url_scan_title: 'Scan URL', url_scan_desc: 'Analyse en temps réel des liens.', 
+    web_ext_title: 'Extension Web', web_ext_desc: 'Protection lors de la navigation.', 
+    email_scan_title: 'Scan Email', email_scan_desc: 'Analyse des pièces jointes.', 
+    about_tag: 'Notre Équipe', about_desc: 'Chercheurs en IA & sécurité.', 
+    click_hint: 'Cliquez sur un membre pour voir son profil GitHub',
+    contact_tag: 'Nous Contacter', contact_title: 'Contactez-nous', contact_sub: 'Suivez-nous sur les réseaux.', 
+    email_label: 'E-mail', email_placeholder: 'vous@exemple.com', message_label: 'Message', 
+    message_placeholder: 'Parlez-nous de votre projet…', send: 'Envoyer', msg_sent: 'Message envoyé !', 
+    analysis_ready: 'Scan terminé', verdict: 'Verdict', confidence: 'Confiance', risk_score: 'Score Risque', 
+    flags: 'Indicateurs', no_flags: 'Aucun signalement.', source: 'Moteur', download_pdf: 'Télécharger PDF' 
   },
-  ar: {
-    home: 'الرئيسية', features: 'الميزات', about: 'من نحن', contact: 'اتصل بنا',
-    hero_desc: 'كشف التهديدات الذكي بالذكاء الاصطناعي. ارفع ملفاً أو الصق رابطاً للفحص الفوري.',
-    file: 'ملف', url: 'رابط',
-    drop_hint: 'اسحب وأفلت ملفك هنا، أو انقر للاستعراض',
-    paste_url: 'الرابط المستهدف', url_placeholder: 'https://example.com/file',
-    analyze: 'فحص الآن', analyzing: 'جارٍ الفحص…', processing: 'جارٍ التحليل…',
-    waiting_api: 'في انتظار استجابة الذكاء الاصطناعي…',
-    features_tag: 'قريباً', features_title: 'ميزات قوية', features_sub: 'قدرات الجيل القادم ستُطلق قريباً.',
-    coming_soon: 'قريباً',
-    about_tag: 'فريقنا', about_title: 'بُني بواسطة باحثين', about_desc: 'فريق متحمس يجمع بحوث الذكاء الاصطناعي وخبرة الأمن.',
-    contact_tag: 'تواصل معنا', contact_title: 'اتصل بنا', contact_sub: 'تواصل معنا عبر وسائل التواصل الاجتماعي.',
-    email_label: 'البريد الإلكتروني', email_placeholder: 'you@example.com',
-    message_label: 'الرسالة', message_placeholder: 'أخبرنا عن مشروعك…',
-    send: 'إرسال', msg_sent: 'تم إرسال الرسالة بنجاح!',
-    analysis_ready: 'اكتمل الفحص',
-    verdict: '🔍 الحكم', confidence: 'الثقة', risk_score: '⚠️ درجة المخاطر',
-    flags: '🚩 مؤشرات التهديد', no_flags: 'لم يتم اكتشاف أي مؤشرات تهديد.',
-    redirected: 'تمت إعادة التوجيه إلى', source: 'المحرك', download_pdf: 'تنزيل تقرير PDF',
+  ar: { 
+    home: 'الرئيسية', features: 'الميزات', about: 'فريقنا', contact: 'اتصل', 
+    hero_desc: 'كشف التهديدات بالذكاء الاصطناعي.', file: 'ملف', url: 'رابط', 
+    drop_hint: 'اسحب ملفك', paste_url: 'الرابط المستهدف', url_placeholder: 'https://example.com', 
+    analyze: 'فحص', analyzing: 'جارٍ الفحص…', processing: 'تحليل…', waiting_api: 'انتظار الذكاء الاصطناعي…', 
+    features_tag: 'حماية متطورة', features_title: 'أمان الجيل القادم', features_sub: 'كشف تهديدات فوري', 
+    coming_soon: 'قريباً', available_now: 'متاح الآن', 
+    file_scan_title: 'فحص الملفات', file_scan_desc: 'فحص عميق للمستندات.', 
+    url_scan_title: 'فحص الروابط', url_scan_desc: 'تحليل الروابط لحظياً.', 
+    web_ext_title: 'إضافة متصفح', web_ext_desc: 'حماية أثناء التصفح.', 
+    email_scan_title: 'فحص البريد', email_scan_desc: 'فحص المرفقات والروابط.', 
+    about_tag: 'الفريق الأساسي', about_desc: 'خبراء أمن وذكاء اصطناعي.', 
+    click_hint: 'انقر على أي عضو لعرض ملفه على GitHub',
+    contact_tag: 'تواصل معنا', contact_title: 'اتصل بنا', contact_sub: 'تابعنا على وسائل التواصل.', 
+    email_label: 'البريد', email_placeholder: 'you@example.com', message_label: 'الرسالة', 
+    message_placeholder: 'أخبرنا عن مشروعك', send: 'إرسال', msg_sent: 'تم الإرسال!', 
+    analysis_ready: 'اكتمل الفحص', verdict: 'الحكم', confidence: 'الثقة', risk_score: 'درجة الخطر', 
+    flags: 'علامات التهديد', no_flags: 'لا تهديدات.', source: 'المحرك', download_pdf: 'تحميل التقرير' 
   }
 };
 
@@ -476,136 +572,107 @@ createApp({
       navItems: [{ id:'home', labelKey:'home' }, { id:'features', labelKey:'features' }, { id:'about', labelKey:'about' }, { id:'contact', labelKey:'contact' }],
       inputMode: 'file', isDragging: false, selectedFile: null, urlInput: '',
       analyzing: false, apiWaiting: false, progressLabel: 0,
-      showModal: false,
-      analysisResult: null,   // ← real API data lives here
-      apiError: null,
+      showModal: false, analysisResult: null, apiError: null,
       contactForm: { email: '', message: '' }, msgSent: false,
-      features: [
-        { icon:'', bg:'linear-gradient(135deg,rgba(37,99,235,.3),rgba(37,99,235,.1))' },
-        { icon:'', bg:'linear-gradient(135deg,rgba(109,40,217,.3),rgba(109,40,217,.1))' },
-        { icon:'', bg:'linear-gradient(135deg,rgba(57,255,110,.2),rgba(57,255,110,.05))' },
-        { icon:'', bg:'linear-gradient(135deg,rgba(239,68,68,.2),rgba(239,68,68,.05))' },
-        { icon:'', bg:'linear-gradient(135deg,rgba(234,179,8,.2),rgba(234,179,8,.05))' },
-        { icon:'', bg:'linear-gradient(135deg,rgba(20,184,166,.2),rgba(20,184,166,.05))' },
-      ],
-      team: [
-        { name:'Alex Chen',   role:'AI Research Lead',  initials:'AC', c1:'#1e3a8a', c2:'#4f46e5' },
-        { name:'Sara Müller', role:'ML Engineer',        initials:'SM', c1:'#4c1d95', c2:'#7c3aed' },
-        { name:'Omar Farouk', role:'Backend Dev',        initials:'OF', c1:'#065f46', c2:'#059669' },
-        { name:'Lena Park',   role:'Product Design',     initials:'LP', c1:'#7c2d12', c2:'#ea580c' },
-        { name:'Ivan Torres', role:'Data Engineer',      initials:'IT', c1:'#1e3a8a', c2:'#2563eb' },
-        { name:'Nour Amine',  role:'Security Analyst',   initials:'NA', c1:'#831843', c2:'#be185d' },
-        { name:'Kim Sato',    role:'DevOps Lead',        initials:'KS', c1:'#164e63', c2:'#0891b2' },
-        { name:'Mia Dupont',  role:'NLP Researcher',     initials:'MD', c1:'#3b0764', c2:'#9333ea' },
+      coreTeam: [
+        { 
+          name: 'GUERRA Cerine', 
+          initials: 'GC',
+          description: 'Malware file scanning AI model developer , UI/UX designer & sandbox security developer ',
+          github: 'https://github.com/cerine-guerra'  
+        },
+        { 
+          name: 'TARFAOUI Abderraouf', 
+          initials: 'TA',  
+          description: 'Data sourcing & processing',
+          github: 'https://github.com/Ruskawimer'  
+        },
+        { 
+          name: 'GHANEM Abderrahmane', 
+          initials: 'GA', 
+          description: 'Team leader & URL AI model developer',
+          github: 'https://github.com/abdogh461-design'  
+        }
       ],
       socials: [
-        { name:'Twitter / X', icon:'', url:'#' },
-        { name:'LinkedIn',    icon:'', url:'#' },
-        { name:'GitHub',      icon:'', url:'#' },
-        { name:'Discord',     icon:'', url:'#' },
-      ],
+        { name: 'twitter', icon: 'fa-brands fa-x-twitter', url: '#', iconClass: '' },
+        { name: 'linkedin', icon: 'fa-brands fa-linkedin-in', url: '#', iconClass: '' },
+        { name: 'github', icon: 'fa-brands fa-github', url: '#', iconClass: '' },
+        { name: 'discord', icon: 'fa-brands fa-discord', url: '#', iconClass: '' }
+      ]
     };
   },
-
-  methods: {
-    t(key) { return (i18n[this.currentLang] || i18n.en)[key] || key; },
-
-    setLang(code) {
-      this.currentLang = code; this.langOpen = false;
-      document.documentElement.setAttribute('lang', code);
-      document.documentElement.setAttribute('dir', code === 'ar' ? 'rtl' : 'ltr');
-    },
-
-    scrollTo(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); },
-    handleDrop(e) { this.isDragging = false; const f = e.dataTransfer.files[0]; if (f) this.selectedFile = f; },
-    handleFileChange(e) { this.selectedFile = e.target.files[0] || null; },
-
-    runAnalysis() {
-      if (this.inputMode === 'file' && !this.selectedFile) { alert('Please select a file first.'); return; }
-      if (this.inputMode === 'url' && !this.urlInput.trim()) { alert('Please enter a URL.'); return; }
-      this.analyzing = true;
-      this.apiWaiting = false;
-      this.progressLabel = 0;
-      this.apiError = null;
-      this.analysisResult = null;
-      const interval = setInterval(() => { if (this.progressLabel < 99) this.progressLabel += 3; else clearInterval(interval); }, 84);
-    },
-
-    
-    onProgressEnd() {
-      this.progressLabel = 100;
-      this.apiWaiting = true;
-      this.callAPI();
-    },
-
-    callAPI() {
-      if (this.inputMode === 'file') {
-        const formData = new FormData();
-        formData.append('file', this.selectedFile);
-        fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: formData })
-          .then(res => { if (!res.ok) return res.json().then(e => { throw new Error(e.detail || 'Server error'); }); return res.json(); })
-          .then(data => { this.analysisResult = data; this.analyzing = false; this.apiWaiting = false; this.showModal = true; })
-          .catch(err => { this.analyzing = false; this.apiWaiting = false; this.apiError = err.message; });
-      } else {
-        fetch(`${API_BASE}/api/analyze-url`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: this.urlInput })
-        })
-          .then(res => { if (!res.ok) return res.json().then(e => { throw new Error(e.detail || 'Server error'); }); return res.json(); })
-          .then(data => { this.analysisResult = data; this.analyzing = false; this.apiWaiting = false; this.showModal = true; })
-          .catch(err => { this.analyzing = false; this.apiWaiting = false; this.apiError = err.message; });
-      }
-    },
-
-    downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const r = this.analysisResult || {};
-      doc.setFontSize(20); doc.setTextColor(13,27,75);
-      doc.text('Prescan AI — Threat Analysis Report', 14, 22);
-      doc.setFontSize(9); doc.setTextColor(120);
-      doc.text('Generated: ' + new Date().toLocaleString(), 14, 30);
-      doc.setDrawColor(57,255,110); doc.setLineWidth(0.5); doc.line(14,34,196,34);
-      doc.setTextColor(0); doc.setFontSize(13);
-      doc.text('Verdict: ' + (r.verdict || 'N/A'), 14, 44);
-      doc.setFontSize(11);
-      doc.text('Risk Score: ' + (r.risk_score !== undefined ? r.risk_score + ' / 100' : 'N/A'), 14, 54);
-      doc.text('Confidence: ' + (r.confidence !== undefined ? r.confidence + '%' : 'N/A'), 14, 62);
-      doc.text('Detection Engine: ' + (r.source || 'N/A'), 14, 70);
-      if (r.filename) doc.text('File: ' + r.filename, 14, 78);
-      if (r.url) { const u = doc.splitTextToSize('URL: ' + r.url, 180); doc.text(u, 14, r.filename ? 86 : 78); }
-      doc.setFontSize(12); doc.text('Threat Flags:', 14, 96);
-      const flags = r.flags || [];
-      if (flags.length === 0) { doc.setFontSize(10); doc.setTextColor(80); doc.text('No threat indicators detected.', 18, 106); }
-      else { flags.forEach((f,i) => { doc.setFontSize(10); doc.setTextColor(180,30,30); doc.text('- ' + f, 18, 106 + i*8); }); }
-      doc.setTextColor(120); doc.setFontSize(8);
-      doc.text('This report was generated automatically by Prescan AI. Results should be reviewed by a security professional.', 14, 285);
-      doc.save('prescan-ai-report.pdf');
-    },
-
-    sendMessage() {
-      if (!this.contactForm.email || !this.contactForm.message) return;
-      fetch(`${API_BASE}/api/contact`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.contactForm)
-      }).catch(() => {});
-      this.msgSent = true;
-      this.contactForm = { email: '', message: '' };
-      setTimeout(() => { this.msgSent = false; }, 4000);
-    },
-  },
-
   mounted() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
     }, { threshold: 0.12 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     document.addEventListener('click', (e) => { if (!e.target.closest('.relative')) this.langOpen = false; });
+    window.addEventListener('load', () => { window.scrollTo(0, 0); });
+  },
+  methods: {
+    t(key) { return (i18n[this.currentLang] || i18n.en)[key] || key; },
+    setLang(code) { this.currentLang = code; this.langOpen = false; document.documentElement.setAttribute('lang', code); document.documentElement.setAttribute('dir', code === 'ar' ? 'rtl' : 'ltr'); },
+    scrollTo(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); },
+    handleDrop(e) { this.isDragging = false; const f = e.dataTransfer.files[0]; if (f) this.selectedFile = f; },
+    handleFileChange(e) { this.selectedFile = e.target.files[0] || null; },
+    openGithub(url) {
+      if (url && url !== '#') {
+        window.open(url, '_blank');
+      }
+    },
+    runAnalysis() {
+      if (this.inputMode === 'file' && !this.selectedFile) { alert('Please select a file.'); return; }
+      if (this.inputMode === 'url' && !this.urlInput.trim()) { alert('Please enter a URL.'); return; }
+      this.analyzing = true; this.apiWaiting = false; this.progressLabel = 0; this.apiError = null; this.analysisResult = null;
+      const interval = setInterval(() => { if (this.progressLabel < 99) this.progressLabel += 3; else clearInterval(interval); }, 84);
+      this.progressInterval = interval;
+    },
+    onProgressEnd() {
+      this.progressLabel = 100; this.apiWaiting = true;
+      this.callAPI();
+    },
+    callAPI() {
+      if (this.inputMode === 'file') {
+        const formData = new FormData(); formData.append('file', this.selectedFile);
+        fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: formData })
+          .then(res => { if (!res.ok) return res.json().then(e => { throw new Error(e.detail || 'Server error'); }); return res.json(); })
+          .then(data => { this.analysisResult = data; this.analyzing = false; this.apiWaiting = false; this.showModal = true; })
+          .catch(err => { this.analyzing = false; this.apiWaiting = false; this.apiError = err.message; });
+      } else {
+        fetch(`${API_BASE}/api/analyze-url`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: this.urlInput }) })
+          .then(res => { if (!res.ok) return res.json().then(e => { throw new Error(e.detail || 'Server error'); }); return res.json(); })
+          .then(data => { this.analysisResult = data; this.analyzing = false; this.apiWaiting = false; this.showModal = true; })
+          .catch(err => { this.analyzing = false; this.apiWaiting = false; this.apiError = err.message; });
+      }
+    },
+    downloadPDF() {
+      const { jsPDF } = window.jspdf; const doc = new jsPDF(); const r = this.analysisResult || {};
+      doc.setFontSize(20); doc.setTextColor(13,27,75); doc.text('Prescan AI — Threat Analysis Report', 14, 22);
+      doc.setFontSize(9); doc.setTextColor(120); doc.text('Generated: ' + new Date().toLocaleString(), 14, 30);
+      doc.setDrawColor(57,255,110); doc.setLineWidth(0.5); doc.line(14,34,196,34);
+      doc.setTextColor(0); doc.setFontSize(13); doc.text('Verdict: ' + (r.verdict || 'N/A'), 14, 44);
+      doc.setFontSize(11); doc.text('Risk Score: ' + (r.risk_score !== undefined ? r.risk_score + ' / 100' : 'N/A'), 14, 54);
+      doc.text('Confidence: ' + (r.confidence !== undefined ? r.confidence + '%' : 'N/A'), 14, 62);
+      doc.text('Engine: ' + (r.source || 'N/A'), 14, 70);
+      if (r.filename) doc.text('File: ' + r.filename, 14, 78);
+      if (r.url) { const u = doc.splitTextToSize('URL: ' + r.url, 180); doc.text(u, 14, r.filename ? 86 : 78); }
+      doc.setFontSize(12); doc.text('Threat Flags:', 14, 96);
+      const flags = r.flags || [];
+      if (flags.length === 0) { doc.setFontSize(10); doc.setTextColor(80); doc.text('No threat indicators detected.', 18, 106); }
+      else { flags.forEach((f,i) => { doc.setFontSize(10); doc.setTextColor(180,30,30); doc.text('- ' + f, 18, 106 + i*8); }); }
+      doc.setTextColor(120); doc.setFontSize(8); doc.text('Automated report by Prescan AI.', 14, 285);
+      doc.save('prescan-ai-report.pdf');
+    },
+    sendMessage() {
+      if (!this.contactForm.email || !this.contactForm.message) return;
+      fetch(`${API_BASE}/api/contact`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.contactForm) }).catch(() => {});
+      this.msgSent = true; this.contactForm = { email: '', message: '' };
+      setTimeout(() => { this.msgSent = false; }, 4000);
+    }
   }
 }).mount('#app');
 </script>
-
 <style>
 .fade-enter-active, .fade-leave-active { transition: opacity .3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
